@@ -1,0 +1,32 @@
+backend:
+  name: github
+  repo: gooddeal22/dailymusicgems
+  branch: main
+
+# This tells the CMS to open a real GitHub login (via Netlify's OAuth bridge).
+# Only GitHub accounts you've given push access to your repo can log in and publish.
+
+media_folder: "content/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "posts"
+    label: "Articles"
+    label_singular: "Article"
+    folder: "content/posts"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        options:
+          - "Style Analysis"
+          - "Discography Deep-Dive"
+          - "Artist Evolution"
+          - "Album Review"
+          - "Other"
+      - { label: "Publish Date", name: "date", widget: "datetime", format: "YYYY-MM-DD", picker_utc: true }
+      - { label: "Excerpt", name: "excerpt", widget: "text", required: false, hint: "One-line summary shown on the homepage card. Auto-generated from the body if left blank." }
+      - { label: "Body", name: "body", widget: "markdown" }
