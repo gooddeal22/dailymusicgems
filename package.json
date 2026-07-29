@@ -1,0 +1,13 @@
+{
+  "name": "dailymusicgems",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Daily Music Gems — playlists hub and music criticism site",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "marked": "^12.0.0"
+  }
+}
