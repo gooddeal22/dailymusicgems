@@ -82,13 +82,31 @@ header{
 }
 .brand{
   display:flex; align-items:center; gap:10px;
-  font-family:'Fraunces', serif; font-weight:700; font-size:1.15rem;
   text-decoration:none;
 }
-.brand .gem{
-  width:22px; height:22px;
-  background:conic-gradient(from 90deg, var(--amethyst), var(--ruby), var(--topaz), var(--emerald), var(--amethyst));
-  clip-path:polygon(50% 0%, 100% 35%, 82% 100%, 18% 100%, 0% 35%);
+.brand-mark{
+  font-family:'Fraunces', serif;
+  font-weight:800;
+  font-style:italic;
+  font-size:1.6rem;
+  letter-spacing:.01em;
+  line-height:1;
+  padding-bottom:4px;
+  background:conic-gradient(from 200deg, var(--amethyst), var(--ruby), var(--topaz), var(--emerald), var(--amethyst));
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  position:relative;
+  display:inline-block;
+}
+.brand-mark::after{
+  content:"";
+  position:absolute;
+  left:1px; right:1px; bottom:-1px;
+  height:2px;
+  border-radius:2px;
+  background:linear-gradient(90deg, var(--amethyst), var(--ruby), var(--topaz), var(--emerald));
+  opacity:.7;
 }
 .navlinks{ display:flex; gap:28px; font-size:.92rem; }
 .navlinks a{ text-decoration:none; color:var(--ink-dim); transition:color .2s; }
@@ -190,7 +208,7 @@ section{ padding:64px 0; position:relative; }
   position:absolute; top:0; left:0; right:0; height:3px;
 }
 .platform-card.spotify::before{ background:linear-gradient(90deg, var(--emerald-deep), var(--emerald)); }
-.platform-card.apple::before{ background:linear-gradient(90deg, var(--ruby-deep), var(--ruby)); }
+.platform-card.youtube::before{ background:linear-gradient(90deg, var(--ruby-deep), var(--ruby)); }
 .platform-card.soundcloud::before{ background:linear-gradient(90deg, var(--topaz-deep), var(--topaz)); }
 
 .platform-icon{
@@ -200,7 +218,7 @@ section{ padding:64px 0; position:relative; }
   margin-bottom:18px;
 }
 .spotify .platform-icon{ background:var(--emerald-glow); color:var(--emerald); }
-.apple .platform-icon{ background:var(--ruby-glow); color:var(--ruby); }
+.youtube .platform-icon{ background:var(--ruby-glow); color:var(--ruby); }
 .soundcloud .platform-icon{ background:var(--topaz-glow); color:var(--topaz); }
 
 .platform-card h3{ font-size:1.2rem; margin-bottom:8px; }
@@ -226,6 +244,18 @@ section{ padding:64px 0; position:relative; }
   color:var(--emerald);
 }
 .badge-live .pulse.live{ background:var(--emerald); }
+.badge-live.topaz{
+  background:var(--topaz-glow);
+  border-color:rgba(251,191,36,.35);
+  color:var(--topaz);
+}
+.badge-live.topaz .pulse.live{ background:var(--topaz); }
+.badge-live.ruby{
+  background:var(--ruby-glow);
+  border-color:rgba(251,69,112,.35);
+  color:var(--ruby);
+}
+.badge-live.ruby .pulse.live{ background:var(--ruby); }
 
 .cta-disabled{
   width:100%;
@@ -255,6 +285,16 @@ section{ padding:64px 0; position:relative; }
   transition:transform .15s ease;
 }
 .cta-live:hover{ transform:translateY(-2px); }
+.cta-live.topaz{
+  border-color:var(--topaz-deep);
+  background:linear-gradient(120deg, var(--topaz-deep), var(--topaz));
+  color:#3a2705;
+}
+.cta-live.ruby{
+  border-color:var(--ruby-deep);
+  background:linear-gradient(120deg, var(--ruby-deep), var(--ruby));
+  color:#3a0a17;
+}
 
 /* writing cards */
 .writing-card{
