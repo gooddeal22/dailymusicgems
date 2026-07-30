@@ -29,7 +29,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=Monoton&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -48,7 +48,7 @@
 
   <section class="hero">
     <div class="wrap">
-      <h1>Daily Music Gems</h1>
+      <h1 class="neon-title"><span class="neon-word neon-ruby">Daily</span> <span class="neon-word neon-topaz">Music</span> <span class="neon-word neon-emerald">Gems</span></h1>
       <p>Find your next favorite song with the best curated library. Read the best music explanations and reviews.</p>
       <div class="hero-ctas">
         <a href="#listen" class="btn btn-primary">Listen</a>
@@ -64,37 +64,31 @@
       <div class="section-head">
         <span class="tag">01 · Listen</span>
         <h2>Where to Listen</h2>
-        <p>Playlists are being built right now. Links land here the moment each platform is ready.</p>
+        <p>Three places to listen — pick whichever fits how you play music.</p>
       </div>
       <div class="grid-3">
 
         <div class="platform-card spotify">
           <div class="platform-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9.5"/><path d="M7 10.5c3-1 7-.6 9.5.8M7.3 13.4c2.4-.8 5.6-.5 7.7.7M7.6 16c1.8-.5 4.2-.3 5.8.6"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9.5"/><path d="M7 10.5c3-1 7-.6 9.5.8M7.3 13.4c2.4-.8 5.6-.5 7.7.7M7.6 16c1.8-.5 4.2-.3 5.8.6"/></svg>
           </div>
-          <span class="badge badge-live"><span class="pulse live"></span> Live</span>
           <h3>Spotify</h3>
-          <p>Rotating playlists built around style, not just mood — sequenced like an argument.</p>
           <a class="cta-live" href="https://open.spotify.com/playlist/3YpuBJqumfFyIr5jLUbjMP?si=dkkqsY8ETpKRvaABTcf3mQ" target="_blank" rel="noopener noreferrer">Listen on Spotify</a>
         </div>
 
         <div class="platform-card youtube">
           <div class="platform-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="5"/><path d="M10 9.2v5.6l5-2.8-5-2.8z" fill="currentColor" stroke="none"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="5"/><path d="M10 9.2v5.6l5-2.8-5-2.8z" fill="currentColor" stroke="none"/></svg>
           </div>
-          <span class="badge badge-live ruby"><span class="pulse live"></span> Live</span>
           <h3>YouTube Music</h3>
-          <p>The same playlists, tuned for YouTube Music's catalog and video-first listening.</p>
           <a class="cta-live ruby" href="https://music.youtube.com/playlist?list=PLEtOwwT7GxaM&si=bjJIIbQkjfmwlkbB" target="_blank" rel="noopener noreferrer">Listen on YouTube Music</a>
         </div>
 
         <div class="platform-card soundcloud">
           <div class="platform-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 15v-3M6 16v-6M9 16.5V9M12 16.5v-9M15 16.5V6M18 16.5c2.2 0 3.5-1.4 3.5-3.3 0-2-1.5-3.3-3.3-3.2-.4-2.3-2.4-4-4.7-4"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 15v-3M6 16v-6M9 16.5V9M12 16.5v-9M15 16.5V6M18 16.5c2.2 0 3.5-1.4 3.5-3.3 0-2-1.5-3.3-3.3-3.2-.4-2.3-2.4-4-4.7-4"/></svg>
           </div>
-          <span class="badge badge-live topaz"><span class="pulse live"></span> Live</span>
           <h3>SoundCloud</h3>
-          <p>Where the deeper cuts and independent releases show up first.</p>
           <a class="cta-live topaz" href="https://on.soundcloud.com/wN8RBHPXE7rri66NZt" target="_blank" rel="noopener noreferrer">Listen on SoundCloud</a>
         </div>
 
@@ -112,7 +106,31 @@
         <p>Long-form pieces on how artists actually build their sound — what's working, what's shifting, and why.</p>
       </div>
       <div class="grid-3">
-<!--WRITING_CARDS-->
+
+        <div class="writing-tile tile-amethyst">
+          <div class="tile-glass">
+            <span class="tile-num">01</span>
+            <h3>Featured</h3>
+            <span class="tile-caption">Coming soon</span>
+          </div>
+        </div>
+
+        <div class="writing-tile tile-topaz">
+          <div class="tile-glass">
+            <span class="tile-num">02</span>
+            <h3>By Artists</h3>
+            <span class="tile-caption">Coming soon</span>
+          </div>
+        </div>
+
+        <div class="writing-tile tile-emerald">
+          <div class="tile-glass">
+            <span class="tile-num">03</span>
+            <h3>Reviews</h3>
+            <span class="tile-caption">Coming soon</span>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
