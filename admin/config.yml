@@ -29,4 +29,5 @@ collections:
           - "Other"
       - { label: "Publish Date", name: "date", widget: "datetime", format: "YYYY-MM-DD", picker_utc: true }
       - { label: "Excerpt", name: "excerpt", widget: "text", required: false, hint: "One-line summary shown on the homepage card. Auto-generated from the body if left blank." }
+      - { label: "Featured Image", name: "image", widget: "image", required: false, hint: "Shown at the top of the article and on its preview card." }
       - { label: "Body", name: "body", widget: "markdown" }
