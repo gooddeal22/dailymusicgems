@@ -137,27 +137,32 @@ header{
   line-height:1.15;
 }
 .neon-title{
-  font-family:'Kanit', sans-serif;
-  font-weight:800;
-  font-style:italic;
+  font-family:'Luckiest Guy', cursive;
+  font-weight:400;
   text-transform:lowercase;
-  letter-spacing:-.01em;
-  font-size:clamp(2.3rem, 5.6vw, 3.9rem);
+  letter-spacing:.01em;
+  font-size:clamp(2.1rem, 5.4vw, 3.7rem);
 }
-.neon-word{ display:inline-block; animation:neon-flicker 5s ease-in-out infinite; }
+.neon-word{
+  display:inline-block;
+  animation:neon-flicker 5s ease-in-out infinite;
+  -webkit-text-stroke:2px rgba(7,4,13,.9);
+  paint-order:stroke fill;
+  filter:drop-shadow(3px 4px 0 rgba(0,0,0,.4));
+}
 .neon-word.neon-topaz{ animation-delay:.6s; }
 .neon-word.neon-emerald{ animation-delay:1.2s; }
 .neon-ruby{
   color:var(--ruby);
-  text-shadow:0 0 6px var(--ruby), 0 0 16px var(--ruby), 0 0 38px var(--ruby-deep), 0 0 70px var(--ruby-deep);
+  text-shadow:0 0 8px var(--ruby), 0 0 18px var(--ruby), 0 0 40px var(--ruby-deep);
 }
 .neon-topaz{
   color:var(--topaz);
-  text-shadow:0 0 6px var(--topaz), 0 0 16px var(--topaz), 0 0 38px var(--topaz-deep), 0 0 70px var(--topaz-deep);
+  text-shadow:0 0 8px var(--topaz), 0 0 18px var(--topaz), 0 0 40px var(--topaz-deep);
 }
 .neon-emerald{
   color:var(--emerald);
-  text-shadow:0 0 6px var(--emerald), 0 0 16px var(--emerald), 0 0 38px var(--emerald-deep), 0 0 70px var(--emerald-deep);
+  text-shadow:0 0 8px var(--emerald), 0 0 18px var(--emerald), 0 0 40px var(--emerald-deep);
 }
 @keyframes neon-flicker{
   0%, 92%, 100%{ opacity:1; }
