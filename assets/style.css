@@ -330,7 +330,12 @@ section{ padding:64px 0; position:relative; }
   border:1px solid var(--line);
   overflow:hidden;
   background:var(--bg-deep);
+  display:block;
+  text-decoration:none;
+  color:inherit;
+  transition:transform .15s ease;
 }
+a.writing-tile:hover{ transform:translateY(-3px); }
 .writing-tile::before{
   content:"";
   position:absolute;
@@ -432,7 +437,25 @@ section{ padding:64px 0; position:relative; }
   text-decoration:none;
   color:inherit;
   transition:transform .15s ease, border-color .15s ease;
+  overflow:hidden;
+  padding:0 0 24px;
 }
+.writing-card.real .card-image{
+  width:100%;
+  aspect-ratio:16 / 10;
+  background-size:cover;
+  background-position:center;
+  border-radius:16px 16px 0 0;
+}
+.writing-card.real .live-flag,
+.writing-card.real .category,
+.writing-card.real h3,
+.writing-card.real .excerpt,
+.writing-card.real .post-date{
+  margin-left:24px;
+  margin-right:24px;
+}
+.writing-card.real .live-flag{ margin-top:20px; }
 .writing-card.real:hover{
   transform:translateY(-3px);
   border-color:var(--amethyst);
@@ -578,6 +601,12 @@ footer{
   font-size:.88rem;
   margin-top:14px;
 }
+.post-image{
+  width:100%;
+  border-radius:14px;
+  margin-top:28px;
+  display:block;
+}
 .post-body{
   margin-top:36px;
   color:var(--ink-dim);
@@ -613,10 +642,42 @@ footer{
   border-top:1px solid var(--line);
 }
 
+/* writing archive page */
+.writing-index{
+  max-width:1120px;
+  padding-top:20px;
+  padding-bottom:40px;
+}
+.writing-index .back-link{
+  margin-bottom:28px;
+  padding:9px 18px;
+  font-size:.85rem;
+  display:inline-block;
+}
+.writing-index h1{
+  font-size:clamp(2rem, 4.2vw, 2.9rem);
+  margin-top:10px;
+}
+.writing-index-sub{
+  color:var(--ink-dim);
+  margin-top:14px;
+  margin-bottom:40px;
+}
+.writing-index-grid{ grid-template-columns:repeat(3, 1fr); }
+.writing-empty{
+  grid-column:1 / -1;
+  text-align:center;
+  color:var(--ink-faint);
+  padding:60px 0;
+  border:1.5px dashed var(--line);
+  border-radius:16px;
+}
+
 @media (max-width:820px){
   .grid-3{ grid-template-columns:1fr; }
   .navlinks{ display:none; }
   .about-split{ grid-template-columns:1fr; }
   .about-photo{ min-height:260px; order:-1; }
   .about-panel{ padding:40px 28px; }
+  .writing-index-grid{ grid-template-columns:1fr; }
 }
