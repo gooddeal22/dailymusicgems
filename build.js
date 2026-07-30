@@ -96,6 +96,7 @@ function loadPosts() {
       category: data.category || "Writing",
       date,
       excerpt,
+      image: data.image || null,
       bodyHtml: marked.parse(content),
       slug,
       url: `/writing/${slug}/`,
@@ -107,7 +108,11 @@ function loadPosts() {
 }
 
 function realCardHtml(post) {
+  const imageHtml = post.image
+    ? `<div class="card-image" style="background-image:url('${escapeHtml(post.image)}')"></div>`
+    : "";
   return `        <a class="writing-card real" href="${post.url}">
+          ${imageHtml}
           <span class="live-flag">Published</span>
           <span class="category">${escapeHtml(post.category)}</span>
           <h3>${escapeHtml(post.title)}</h3>
@@ -141,12 +146,19 @@ function buildPosts(posts) {
   const template = fs.readFileSync(path.join(ROOT, "templates", "post.template.html"), "utf8");
 
   for (const post of posts) {
+    const imageHtml = post.image
+      ? `<img class="post-image" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}">`
+      : "";
+    const ogImage = post.image ? `https://dailymusicgems.xyz${post.image}` : "https://dailymusicgems.xyz/og-image.png";
+
     const html = template
       .replaceAll("{{TITLE}}", escapeHtml(post.title))
       .replaceAll("{{CATEGORY}}", escapeHtml(post.category))
       .replaceAll("{{DATE}}", formatDate(post.date))
       .replaceAll("{{EXCERPT}}", escapeHtml(post.excerpt))
       .replaceAll("{{URL}}", post.url)
+      .replaceAll("{{OG_IMAGE}}", ogImage)
+      .replace("{{IMAGE}}", imageHtml)
       .replace("{{BODY}}", post.bodyHtml);
 
     const outDir = path.join(DIST, "writing", post.slug);
@@ -155,9 +167,24 @@ function buildPosts(posts) {
   }
 }
 
+function buildWritingIndex(posts) {
+  const template = fs.readFileSync(path.join(ROOT, "templates", "writing-index.template.html"), "utf8");
+  const cards = posts.length
+    ? posts.map(realCardHtml).join("")
+    : `        <div class="writing-empty">
+          <p>Nothing published yet — check back soon.</p>
+        </div>\n`;
+
+  const html = template.replace("<!--WRITING_CARDS-->", cards);
+  const outDir = path.join(DIST, "writing");
+  fs.mkdirSync(outDir, { recursive: true });
+  fs.writeFileSync(path.join(outDir, "index.html"), html);
+}
+
 function buildSitemap(posts) {
   const urls = [
     { loc: `${SITE_URL}/`, lastmod: isoDate(new Date()), priority: "1.0" },
+    { loc: `${SITE_URL}/writing/`, lastmod: isoDate(new Date()), priority: "0.8" },
     ...posts.map((p) => ({ loc: `${SITE_URL}${p.url}`, lastmod: isoDate(p.date), priority: "0.7" })),
   ];
 
@@ -182,6 +209,11 @@ function copyStaticAssets() {
   copyDir(path.join(ROOT, "assets"), path.join(DIST, "assets"));
   copyFile(path.join(ROOT, "robots.txt"), DIST, "robots.txt");
   copyDir(path.join(ROOT, "admin"), path.join(DIST, "admin"));
+
+  const uploadsDir = path.join(ROOT, "content", "uploads");
+  if (fs.existsSync(uploadsDir)) {
+    copyDir(uploadsDir, path.join(DIST, "uploads"));
+  }
 }
 
 function main() {
@@ -191,6 +223,7 @@ function main() {
   const posts = loadPosts();
   buildHome(posts);
   buildPosts(posts);
+  buildWritingIndex(posts);
   buildSitemap(posts);
   copyStaticAssets();
 
