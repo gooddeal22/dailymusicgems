@@ -18,6 +18,7 @@ collections:
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
+      - { label: "Artist", name: "artist", widget: "string", required: false, hint: "The artist this piece is about. Used to build the alphabetical 'By Artists' index." }
       - label: "Category"
         name: "category"
         widget: "select"
@@ -30,4 +31,5 @@ collections:
       - { label: "Publish Date", name: "date", widget: "datetime", format: "YYYY-MM-DD", picker_utc: true }
       - { label: "Excerpt", name: "excerpt", widget: "text", required: false, hint: "One-line summary shown on the homepage card. Auto-generated from the body if left blank." }
       - { label: "Featured Image", name: "image", widget: "image", required: false, hint: "Shown at the top of the article and on its preview card." }
+      - { label: "Featured", name: "featured", widget: "boolean", default: false, required: false, hint: "Check this to include the piece in the homepage 'Featured' picks. You choose which pieces count as featured." }
       - { label: "Body", name: "body", widget: "markdown" }
