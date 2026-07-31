@@ -3,29 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{TITLE}} — Daily Music Gems</title>
-<meta name="description" content="{{EXCERPT}}">
+<title>By Artists — Daily Music Gems</title>
+<meta name="description" content="Every artist Daily Music Gems has written about, A to Z.">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://dailymusicgems.xyz{{URL}}">
+<link rel="canonical" href="https://dailymusicgems.xyz/writing/artists/">
 <meta name="theme-color" content="#0b0714">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="stylesheet" href="/assets/style.css">
-
-<!-- Open Graph -->
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://dailymusicgems.xyz{{URL}}">
-<meta property="og:site_name" content="Daily Music Gems">
-<meta property="og:title" content="{{TITLE}}">
-<meta property="og:description" content="{{EXCERPT}}">
-<meta property="og:image" content="{{OG_IMAGE}}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{TITLE}}">
-<meta name="twitter:description" content="{{EXCERPT}}">
-<meta name="twitter:image" content="{{OG_IMAGE}}">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,19 +29,16 @@
 </header>
 
 <main>
-  <article class="wrap post">
-    <a href="/#writing" class="btn btn-ghost back-link">← Back to all writing</a>
-    <span class="tag">{{CATEGORY}}</span>
-    <h1>{{TITLE}}</h1>
-    <p class="post-meta">{{DATE}}</p>
-    {{IMAGE}}
-    <div class="post-body">
-{{BODY}}
+  <section class="wrap writing-index">
+    <a href="/#writing" class="btn btn-ghost back-link">← Back to home</a>
+    <span class="tag">02 · Read</span>
+    <h1>By Artists</h1>
+    <p class="writing-index-sub">Every artist covered so far, A to Z.</p>
+
+    <div class="artist-list">
+<!--ARTIST_ROWS-->
     </div>
-    <div class="post-footer">
-      <a href="/#writing" class="btn btn-ghost">← Back to all writing</a>
-    </div>
-  </article>
+  </section>
 </main>
 
 <footer>
