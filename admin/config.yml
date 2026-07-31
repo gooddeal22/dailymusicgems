@@ -2,8 +2,12 @@ backend:
   name: github
   repo: gooddeal22/dailymusicgems
   branch: main
+  base_url: https://dailymusicgems.xyz
+  auth_endpoint: api/auth
 
-# This tells the CMS to open a real GitHub login (via Netlify's OAuth bridge).
+# This tells the CMS to open a real GitHub login, handled by our own OAuth
+# endpoints running as Cloudflare Pages Functions (functions/api/auth.js and
+# functions/api/callback.js) — this replaces Netlify's built-in OAuth bridge.
 # Only GitHub accounts you've given push access to your repo can log in and publish.
 
 media_folder: "content/uploads"
