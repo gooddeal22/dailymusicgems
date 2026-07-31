@@ -68,6 +68,14 @@ function slugFromFilename(filename) {
   return base.replace(/^\d{4}-\d{2}-\d{2}-/, "");
 }
 
+function slugify(str) {
+  return String(str || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function plainTextExcerpt(markdown, max = 160) {
   const text = markdown
     .replace(/!\[.*?\]\(.*?\)/g, "")
@@ -94,6 +102,8 @@ function loadPosts() {
     return {
       title: data.title || "Untitled",
       category: data.category || "Writing",
+      artist: data.artist && data.artist.trim() ? data.artist.trim() : null,
+      featured: !!data.featured,
       date,
       excerpt,
       image: data.image || null,
@@ -113,11 +123,13 @@ function realCardHtml(post) {
     : "";
   return `        <a class="writing-card real" href="${post.url}">
           ${imageHtml}
-          <span class="live-flag">Published</span>
-          <span class="category">${escapeHtml(post.category)}</span>
-          <h3>${escapeHtml(post.title)}</h3>
-          <p class="excerpt">${escapeHtml(post.excerpt)}</p>
-          <span class="post-date">${formatDate(post.date)}</span>
+          <div class="card-body">
+            <span class="live-flag">Published</span>
+            <span class="category">${escapeHtml(post.category)}</span>
+            <h3>${escapeHtml(post.title)}</h3>
+            <p class="excerpt">${escapeHtml(post.excerpt)}</p>
+            <span class="post-date">${formatDate(post.date)}</span>
+          </div>
         </a>\n`;
 }
 
@@ -167,24 +179,120 @@ function buildPosts(posts) {
   }
 }
 
-function buildWritingIndex(posts) {
+function renderWritingList(posts, opts) {
   const template = fs.readFileSync(path.join(ROOT, "templates", "writing-index.template.html"), "utf8");
   const cards = posts.length
     ? posts.map(realCardHtml).join("")
     : `        <div class="writing-empty">
-          <p>Nothing published yet — check back soon.</p>
+          <p>${escapeHtml(opts.emptyText || "Nothing published yet — check back soon.")}</p>
         </div>\n`;
 
-  const html = template.replace("<!--WRITING_CARDS-->", cards);
+  return template
+    .replaceAll("{{PAGE_TITLE}}", escapeHtml(opts.pageTitle))
+    .replaceAll("{{META_DESCRIPTION}}", escapeHtml(opts.metaDescription))
+    .replaceAll("{{CANONICAL}}", opts.canonical)
+    .replaceAll("{{BACK_HREF}}", opts.backHref || "/#writing")
+    .replaceAll("{{BACK_LABEL}}", escapeHtml(opts.backLabel || "Back to home"))
+    .replaceAll("{{TAG}}", escapeHtml(opts.tag || "02 · Read"))
+    .replaceAll("{{H1}}", escapeHtml(opts.h1))
+    .replaceAll("{{SUBTITLE}}", escapeHtml(opts.subtitle))
+    .replace("<!--WRITING_CARDS-->", cards);
+}
+
+function buildWritingIndex(posts) {
+  const html = renderWritingList(posts, {
+    pageTitle: "Writing",
+    metaDescription: "All Daily Music Gems write-ups: style analyses, discography deep-dives, artist evolution pieces, and album reviews.",
+    canonical: "/writing/",
+    h1: "All Writing",
+    subtitle: "Every piece published so far, newest first.",
+    emptyText: "Nothing published yet — check back soon.",
+  });
   const outDir = path.join(DIST, "writing");
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, "index.html"), html);
 }
 
-function buildSitemap(posts) {
+function buildFeaturedIndex(posts) {
+  const featured = posts.filter((p) => p.featured);
+  const html = renderWritingList(featured, {
+    pageTitle: "Featured",
+    metaDescription: "Hand-picked Daily Music Gems write-ups — the pieces worth reading first.",
+    canonical: "/writing/featured/",
+    h1: "Featured",
+    subtitle: "Hand-picked pieces, chosen as the best place to start.",
+    emptyText: "Nothing has been marked as featured yet — check back soon.",
+  });
+  const outDir = path.join(DIST, "writing", "featured");
+  fs.mkdirSync(outDir, { recursive: true });
+  fs.writeFileSync(path.join(outDir, "index.html"), html);
+}
+
+function buildArtistPages(posts) {
+  const withArtist = posts.filter((p) => p.artist);
+  const byArtist = new Map(); // slug -> { name, posts: [] }
+
+  for (const post of withArtist) {
+    const slug = slugify(post.artist);
+    if (!byArtist.has(slug)) byArtist.set(slug, { name: post.artist, posts: [] });
+    byArtist.get(slug).posts.push(post);
+  }
+
+  // Individual artist pages, each newest-first (posts are already sorted overall,
+  // but re-sort defensively in case this function is ever called out of order).
+  for (const [slug, entry] of byArtist.entries()) {
+    const artistPosts = entry.posts.slice().sort((a, b) => b.date - a.date);
+    const html = renderWritingList(artistPosts, {
+      pageTitle: entry.name,
+      metaDescription: `Daily Music Gems write-ups about ${entry.name}.`,
+      canonical: `/writing/artist/${slug}/`,
+      backHref: "/writing/artists/",
+      backLabel: "Back to all artists",
+      tag: "02 · Read",
+      h1: entry.name,
+      subtitle: `Every piece about ${entry.name}, newest first.`,
+    });
+    const outDir = path.join(DIST, "writing", "artist", slug);
+    fs.mkdirSync(outDir, { recursive: true });
+    fs.writeFileSync(path.join(outDir, "index.html"), html);
+  }
+
+  // Alphabetical A-Z index of artists.
+  const template = fs.readFileSync(path.join(ROOT, "templates", "writing-artists.template.html"), "utf8");
+  const sortedSlugs = [...byArtist.keys()].sort((a, b) =>
+    byArtist.get(a).name.localeCompare(byArtist.get(b).name, undefined, { sensitivity: "base" })
+  );
+
+  const rows = sortedSlugs.length
+    ? sortedSlugs
+        .map((slug) => {
+          const entry = byArtist.get(slug);
+          const count = entry.posts.length;
+          return `        <a class="artist-row" href="/writing/artist/${slug}/">
+          <span class="artist-name">${escapeHtml(entry.name)}</span>
+          <span class="artist-count">${count} piece${count === 1 ? "" : "s"}</span>
+        </a>\n`;
+        })
+        .join("")
+    : `        <div class="writing-empty">
+          <p>No artists tagged yet — check back soon.</p>
+        </div>\n`;
+
+  const html = template.replace("<!--ARTIST_ROWS-->", rows);
+  const outDir = path.join(DIST, "writing", "artists");
+  fs.mkdirSync(outDir, { recursive: true });
+  fs.writeFileSync(path.join(outDir, "index.html"), html);
+
+  return sortedSlugs.map((slug) => ({ slug, name: byArtist.get(slug).name }));
+}
+
+function buildSitemap(posts, artists) {
   const urls = [
     { loc: `${SITE_URL}/`, lastmod: isoDate(new Date()), priority: "1.0" },
     { loc: `${SITE_URL}/writing/`, lastmod: isoDate(new Date()), priority: "0.8" },
+    { loc: `${SITE_URL}/writing/featured/`, lastmod: isoDate(new Date()), priority: "0.7" },
+    { loc: `${SITE_URL}/writing/artists/`, lastmod: isoDate(new Date()), priority: "0.6" },
+    ...artists.map((a) => ({ loc: `${SITE_URL}/writing/artist/${a.slug}/`, lastmod: isoDate(new Date()), priority: "0.6" })),
     ...posts.map((p) => ({ loc: `${SITE_URL}${p.url}`, lastmod: isoDate(p.date), priority: "0.7" })),
   ];
 
@@ -224,7 +332,9 @@ function main() {
   buildHome(posts);
   buildPosts(posts);
   buildWritingIndex(posts);
-  buildSitemap(posts);
+  buildFeaturedIndex(posts);
+  const artists = buildArtistPages(posts);
+  buildSitemap(posts, artists);
   copyStaticAssets();
 
   console.log(`Built ${posts.length} post(s). Output: dist/`);
