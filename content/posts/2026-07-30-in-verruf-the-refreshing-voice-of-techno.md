@@ -1,6 +1,8 @@
 ---
 title: "In Verruf : The refreshing voice of Techno"
 category: Style Analysis
+artist: In Verruf
+featured: true
 date: 2026-07-30
 excerpt: Crowds are only gettting bigger and bigger for In Verruf, his sound has
   become a defining face of techno in 2026. In verruf was featured on
