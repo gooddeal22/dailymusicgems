@@ -1,6 +1,7 @@
 ---
 title: Is Brothel In Belize The New Crystal Castles?
 category: Album Review
+artist: Brothel In Belize
 date: 2026-07-30
 excerpt: Brothel In Belize Released Their First Studio Album "Machine Machine"
 image: /uploads/brothel-in-belize-600x445.jpg
