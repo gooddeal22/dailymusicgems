@@ -33,6 +33,7 @@ body{
   font-family:'Inter', sans-serif;
   line-height:1.6;
   -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
 }
 h1,h2,h3{
   font-family:'Fraunces', serif;
@@ -118,8 +119,12 @@ header{
   transform:translate(-50%, -50%);
   display:flex; gap:28px; font-size:.92rem;
 }
-.navlinks a{ text-decoration:none; color:var(--ink-dim); transition:color .2s; }
+.navlinks a{
+  display:flex; align-items:center; justify-content:center;
+  text-decoration:none; color:var(--ink-dim); transition:color .2s;
+}
 .navlinks a:hover{ color:var(--ink); }
+.navlink-icon{ display:none; }
 
 /* hero */
 .hero{
@@ -435,6 +440,30 @@ a.writing-tile:hover{ transform:translateY(-3px); }
   color:var(--ink-faint);
 }
 
+/* flush, full-bleed variant — tiles span edge-to-edge, touching each other */
+.grid-3.tiles-flush{
+  grid-template-columns:repeat(3, 1fr);
+  gap:0;
+  width:100vw;
+  position:relative;
+  left:50%;
+  transform:translateX(-50%);
+}
+.tiles-flush .writing-tile{
+  aspect-ratio:auto;
+  min-height:360px;
+  border-radius:0;
+  border:none;
+  border-right:1px solid rgba(255,255,255,.14);
+}
+.tiles-flush .writing-tile:last-child{ border-right:none; }
+.tiles-flush .tile-glass{
+  inset:0;
+  border-radius:0;
+  border:none;
+  box-shadow:none;
+}
+
 /* writing cards */
 .writing-card{
   background:rgba(255,255,255,.04);
@@ -478,7 +507,8 @@ a.writing-tile:hover{ transform:translateY(-3px); }
   color:inherit;
   transition:transform .15s ease, border-color .15s ease;
   overflow:hidden;
-  padding:0 0 24px;
+  padding:0;
+  gap:0;
 }
 .writing-card.real .card-image{
   width:100%;
@@ -487,15 +517,12 @@ a.writing-tile:hover{ transform:translateY(-3px); }
   background-position:center;
   border-radius:16px 16px 0 0;
 }
-.writing-card.real .live-flag,
-.writing-card.real .category,
-.writing-card.real h3,
-.writing-card.real .excerpt,
-.writing-card.real .post-date{
-  margin-left:24px;
-  margin-right:24px;
+.writing-card.real .card-body{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  padding:20px 24px 24px;
 }
-.writing-card.real .live-flag{ margin-top:20px; }
 .writing-card.real:hover{
   transform:translateY(-3px);
   border-color:var(--amethyst);
@@ -715,15 +742,59 @@ footer{
   text-align:center;
   color:var(--ink-faint);
   padding:60px 0;
-  border:1.5px dashed var(--line);
+  background:rgba(255,255,255,.03);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border:1.5px dashed rgba(255,255,255,.18);
   border-radius:16px;
+}
+
+/* artist A-Z list */
+.artist-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.artist-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px 22px;
+  background:rgba(255,255,255,.045);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:12px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
+  text-decoration:none;
+  color:inherit;
+  transition:transform .15s ease, border-color .15s ease;
+}
+.artist-row:hover{
+  transform:translateX(4px);
+  border-color:var(--amethyst);
+}
+.artist-name{
+  font-family:'Fraunces', serif;
+  font-size:1.15rem;
+  color:var(--ink);
+}
+.artist-count{
+  font-size:.78rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
 }
 
 @media (max-width:820px){
   .grid-3{ grid-template-columns:1fr; }
-  .navlinks{ display:none; }
+  .navlinks{ display:flex; gap:22px; }
+  .navlink-text{ display:none; }
+  .navlink-icon{ display:inline-flex; }
   .about-split{ grid-template-columns:1fr; }
   .about-photo{ min-height:260px; order:-1; }
   .about-panel{ padding:40px 28px; }
   .writing-index-grid{ grid-template-columns:1fr; }
+  .tiles-flush .writing-tile{ border-right:none; border-bottom:1px solid rgba(255,255,255,.14); }
+  .tiles-flush .writing-tile:last-child{ border-bottom:none; }
 }
