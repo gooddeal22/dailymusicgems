@@ -2,8 +2,11 @@ backend:
   name: github
   repo: gooddeal22/dailymusicgems
   branch: main
-  base_url: https://dailymusicgems.xyz
+  base_url: https://dailymusicgems.pages.dev
   auth_endpoint: api/auth
+  # NOTE: temporarily pointed at the .pages.dev domain while dailymusicgems.xyz's
+  # DNS is still being cut over to Cloudflare. Switch this back to
+  # https://dailymusicgems.xyz once the custom domain is connected.
 
 # This tells the CMS to open a real GitHub login, handled by our own OAuth
 # endpoints running as Cloudflare Pages Functions (functions/api/auth.js and
