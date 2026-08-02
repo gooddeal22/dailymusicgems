@@ -133,6 +133,29 @@ function realCardHtml(post) {
         </a>\n`;
 }
 
+function pickPreviewPosts(posts) {
+  const featured = posts.filter((p) => p.featured);
+  const rest = posts.filter((p) => !p.featured);
+  return [...featured, ...rest].slice(0, 2);
+}
+
+function heroPreviewCardHtml(post) {
+  const shortExcerpt =
+    post.excerpt.length > 78 ? post.excerpt.slice(0, 78).trim() + "…" : post.excerpt;
+  const thumbStyle = post.image ? ` style="background-image:url('${escapeHtml(post.image)}')"` : "";
+  return `        <a class="preview-card" href="${post.url}">
+          <span class="preview-thumb"${thumbStyle}>
+            <span class="preview-play">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+          </span>
+          <span class="preview-copy">
+            <span class="preview-title">${escapeHtml(post.title)}</span>
+            <span class="preview-excerpt">${escapeHtml(shortExcerpt)}</span>
+          </span>
+        </a>\n`;
+}
+
 function placeholderCardHtml(card) {
   return `        <div class="writing-card">
           <span class="placeholder-flag">Placeholder</span>
@@ -149,7 +172,11 @@ function buildHome(posts) {
   const placeholdersNeeded = Math.max(0, 3 - posts.length);
   const placeholderCards = PLACEHOLDER_CARDS.slice(0, placeholdersNeeded).map(placeholderCardHtml).join("");
 
-  const html = template.replace("<!--WRITING_CARDS-->", realCards + placeholderCards);
+  const previewCards = pickPreviewPosts(posts).map(heroPreviewCardHtml).join("");
+
+  const html = template
+    .replace("<!--WRITING_CARDS-->", realCards + placeholderCards)
+    .replace("<!--HERO_PREVIEW_CARDS-->", previewCards);
   fs.mkdirSync(DIST, { recursive: true });
   fs.writeFileSync(path.join(DIST, "index.html"), html);
 }
