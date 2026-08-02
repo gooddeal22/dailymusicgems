@@ -455,13 +455,6 @@ a.writing-tile:hover{ transform:translateY(-3px); }
   font-size:1.35rem;
   color:var(--ink);
 }
-.tile-caption{
-  font-size:.68rem;
-  letter-spacing:.1em;
-  text-transform:uppercase;
-  color:var(--ink-faint);
-}
-
 /* flush, full-bleed variant — tiles span edge-to-edge, touching each other */
 .grid-3.tiles-flush{
   grid-template-columns:repeat(3, 1fr);
@@ -473,7 +466,7 @@ a.writing-tile:hover{ transform:translateY(-3px); }
 }
 .tiles-flush .writing-tile{
   aspect-ratio:auto;
-  min-height:360px;
+  min-height:520px;
   border-radius:0;
   border:none;
   border-right:1px solid rgba(255,255,255,.14);
