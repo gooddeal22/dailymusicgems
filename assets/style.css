@@ -24,10 +24,10 @@
   --topaz-glow:rgba(251,191,36,.14);
 
   /* pale glass surface tones — used for panel backgrounds instead of color tint */
-  --glass-bg:rgba(255,255,255,.12);
-  --glass-bg-soft:rgba(255,255,255,.09);
-  --glass-border:rgba(255,255,255,.26);
-  --glass-highlight:rgba(255,255,255,.24);
+  --glass-bg:rgba(255,255,255,.1);
+  --glass-bg-soft:rgba(255,255,255,.06);
+  --glass-border:rgba(255,255,255,.42);
+  --glass-highlight:rgba(255,255,255,.55);
 }
 
 *{ box-sizing:border-box; }
@@ -64,35 +64,28 @@ body{
   background-attachment:fixed;
 }
 
-/* glass-morphism section divider */
+/* simple glass crease — a fold line dividing sections, no floating shape */
 .facet-divider{
-  height:64px;
+  height:40px;
   width:100%;
   position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
 }
 .facet-divider::before{
-  /* the seam line running edge to edge */
+  /* the raised edge of the crease */
   content:"";
   position:absolute;
   top:50%; left:0; right:0;
   height:1px;
-  background:linear-gradient(90deg, transparent, rgba(255,255,255,.16) 20%, rgba(255,255,255,.16) 80%, transparent);
+  transform:translateY(-1px);
+  background:linear-gradient(90deg, transparent, var(--glass-border) 12%, var(--glass-border) 88%, transparent);
 }
 .facet-divider::after{
-  /* frosted glass pill sitting on the seam */
+  /* the shadowed underside of the crease, sitting just below the highlight */
   content:"";
-  position:relative;
-  width:132px;
-  height:36px;
-  background:var(--glass-bg);
-  backdrop-filter:blur(26px);
-  -webkit-backdrop-filter:blur(26px);
-  border:1px solid var(--glass-border);
-  border-radius:999px;
-  box-shadow:inset 0 1px 0 var(--glass-highlight), inset 0 -1px 0 rgba(0,0,0,.2), 0 10px 26px rgba(0,0,0,.35);
+  position:absolute;
+  top:50%; left:0; right:0;
+  height:1px;
+  background:linear-gradient(90deg, transparent, rgba(0,0,0,.4) 12%, rgba(0,0,0,.4) 88%, transparent);
 }
 
 /* header */
@@ -110,7 +103,7 @@ header{
   -webkit-backdrop-filter:blur(26px);
   border:1px solid var(--glass-border);
   border-radius:18px;
-  box-shadow:inset 0 1px 0 var(--glass-highlight), 0 10px 30px rgba(0,0,0,.35);
+  box-shadow:inset 0 1.5px 0 var(--glass-highlight), inset 0 -14px 22px rgba(0,0,0,.14), 0 10px 30px rgba(0,0,0,.35);
   overflow:hidden;
 }
 .nav::after{
@@ -229,8 +222,8 @@ header{
 .btn{
   font-family:'Inter', sans-serif;
   font-weight:600; font-size:.92rem;
-  padding:13px 26px;
-  border-radius:12px;
+  padding:14px 28px;
+  border-radius:999px;
   text-decoration:none;
   border:1px solid var(--glass-border);
   transition:transform .15s ease, border-color .15s ease, background .15s ease;
@@ -239,23 +232,32 @@ header{
   overflow:hidden;
   backdrop-filter:blur(20px);
   -webkit-backdrop-filter:blur(20px);
-  box-shadow:inset 0 1px 0 var(--glass-highlight), 0 8px 22px rgba(0,0,0,.3);
+  box-shadow:inset 0 -10px 16px rgba(0,0,0,.14), 0 8px 22px rgba(0,0,0,.3);
+}
+.btn::before{
+  /* liquid-glass specular highlight — bright arc along the top, fading down */
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,0) 60%);
+  pointer-events:none;
 }
 .btn::after{
   content:"";
   position:absolute;
   top:-80%; left:-30%;
   width:40%; height:280%;
-  background:linear-gradient(120deg, transparent, rgba(255,255,255,.28), transparent);
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,.22), transparent);
   transform:rotate(20deg);
   pointer-events:none;
 }
 .btn:hover{ transform:translateY(-2px); }
 .btn-primary{
-  background:linear-gradient(120deg, rgba(109,40,217,.55), rgba(161,123,255,.4));
+  background:linear-gradient(180deg, rgba(161,123,255,.4), rgba(109,40,217,.55));
   color:#fff;
 }
-.btn-primary:hover{ background:linear-gradient(120deg, rgba(109,40,217,.65), rgba(161,123,255,.5)); }
+.btn-primary:hover{ background:linear-gradient(180deg, rgba(161,123,255,.5), rgba(109,40,217,.65)); }
 .btn-ghost{
   background:var(--glass-bg-soft);
   color:var(--ink);
@@ -272,7 +274,7 @@ header{
   -webkit-backdrop-filter:blur(28px);
   border:1px solid var(--glass-border);
   border-radius:18px;
-  box-shadow:inset 0 1px 0 var(--glass-highlight), 0 14px 34px rgba(0,0,0,.35);
+  box-shadow:inset 0 1.5px 0 var(--glass-highlight), inset 0 -14px 22px rgba(0,0,0,.14), 0 14px 34px rgba(0,0,0,.35);
   overflow:hidden;
   position:relative;
 }
@@ -372,7 +374,7 @@ section{ padding:64px 0; position:relative; }
   backdrop-filter:blur(24px);
   -webkit-backdrop-filter:blur(24px);
   border:1px solid var(--glass-border);
-  box-shadow:inset 0 1px 0 var(--glass-highlight), 0 8px 26px rgba(0,0,0,.3);
+  box-shadow:inset 0 1.5px 0 var(--glass-highlight), inset 0 -14px 22px rgba(0,0,0,.14), 0 8px 26px rgba(0,0,0,.3);
   border-radius:4px 14px 4px 14px;
   padding:20px 18px;
   position:relative;
@@ -514,7 +516,7 @@ a.writing-tile:hover{ transform:translateY(-3px); }
   backdrop-filter:blur(22px);
   -webkit-backdrop-filter:blur(22px);
   border:1px solid var(--glass-border);
-  box-shadow:inset 0 1px 0 var(--glass-highlight);
+  box-shadow:inset 0 1.5px 0 var(--glass-highlight), inset 0 -14px 22px rgba(0,0,0,.14);
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
   overflow:hidden;
   text-align:center;
@@ -662,7 +664,7 @@ a.writing-tile:hover{ transform:translateY(-3px); }
   background:var(--glass-bg);
   backdrop-filter:blur(28px);
   -webkit-backdrop-filter:blur(28px);
-  box-shadow:inset 0 1px 0 var(--glass-highlight), 0 12px 34px rgba(0,0,0,.3);
+  box-shadow:inset 0 1.5px 0 var(--glass-highlight), inset 0 -14px 22px rgba(0,0,0,.14), 0 12px 34px rgba(0,0,0,.3);
   position:relative;
 }
 .about-split::after{
@@ -874,7 +876,7 @@ footer{
   -webkit-backdrop-filter:blur(22px);
   border:1px solid var(--glass-border);
   border-radius:12px;
-  box-shadow:inset 0 1px 0 var(--glass-highlight);
+  box-shadow:inset 0 1.5px 0 var(--glass-highlight), inset 0 -14px 22px rgba(0,0,0,.14);
   text-decoration:none;
   color:inherit;
   position:relative;
