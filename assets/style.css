@@ -858,16 +858,27 @@ section.about-full::after{
   text-transform:uppercase;
   color:#f3c986;
 }
-.yt-sub{
-  padding:20px 4px;
-  border-bottom:1px solid rgba(255,240,215,.25);
-  font-family:'Fraunces', serif;
-  font-style:italic;
-  font-size:clamp(1.25rem, 1.7vw, 1.5rem);
-  color:var(--ink);
-  transition:color .2s ease, padding-left .2s ease;
+.yt-b{
+  padding:28px 32px;
+  border-radius:4px 22px 4px 22px;
+  border:1px solid rgba(190,215,255,.45);
+  background:linear-gradient(160deg, rgba(48,108,196,.85), rgba(20,48,104,.95));
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.35), 0 14px 34px rgba(0,0,0,.4);
+  transition:transform .15s ease, filter .2s ease;
 }
-.yt-sub:hover{ color:var(--topaz); padding-left:12px; }
+.yt-b:hover{ transform:translateY(-3px); filter:brightness(1.12); }
+.yt-btitle{
+  font-family:'Fraunces', serif;
+  font-weight:600;
+  font-size:clamp(1.6rem, 2.4vw, 2.2rem);
+  line-height:1.15;
+  color:#f4f8ff;
+}
+.yt-bhandle{
+  font-size:1.05rem;
+  color:rgba(222,234,255,.85);
+}
+.yt-b .yt-cta{ color:#bcd6ff; }
 
 footer{
   border-top:1px solid var(--line);
