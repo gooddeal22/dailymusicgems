@@ -27,13 +27,16 @@ collections:
         name: "category"
         widget: "select"
         options:
+          - "Gem of the Day"
           - "Style Analysis"
           - "Discography Deep-Dive"
           - "Artist Evolution"
           - "Album Review"
           - "Other"
       - { label: "Publish Date", name: "date", widget: "datetime", format: "YYYY-MM-DD", picker_utc: true }
-      - { label: "Excerpt", name: "excerpt", widget: "text", required: false, hint: "One-line summary shown on the homepage card. Auto-generated from the body if left blank." }
+      - { label: "Player Link (Gem of the Day)", name: "player_url", widget: "string", required: false, hint: "Paste the share link for the song. Supported: a Spotify track/album/playlist link, a YouTube or YouTube Music video link, or a full soundcloud.com track link (not on.soundcloud.com short links). Official links only - never upload audio files." }
+      - { label: "Sponsored? (paid or gifted)", name: "sponsored", widget: "boolean", default: false, required: false, hint: "Leave OFF unless the artist, a label or anyone else gave you money, free product or other benefits for this post. Turning it ON adds a visible 'Sponsored' label and disclosure (required by FTC guidelines)." }
+      - { label: "Excerpt", name: "excerpt", widget: "text", required: false, hint: "One-line summary shown on the homepage card. For a Gem of the Day, write 1-2 sentences on why this song is a gem - it shows on the homepage next to the player. Auto-generated from the body if left blank." }
       - { label: "Featured Image", name: "image", widget: "image", required: false, hint: "Shown at the top of the article and on its preview card." }
       - { label: "Featured", name: "featured", widget: "boolean", default: false, required: false, hint: "Check this to include the piece in the homepage 'Featured' picks. You choose which pieces count as featured." }
-      - { label: "Body", name: "body", widget: "markdown" }
+      - { label: "Body", name: "body", widget: "markdown", required: false, hint: "Optional for a Gem of the Day. Short quotes only - do not paste full lyrics." }
