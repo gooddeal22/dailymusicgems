@@ -232,6 +232,8 @@ function loadPosts() {
       embed: parsePlayer(data.player_url),
       date,
       excerpt,
+      hasExcerpt: !!(data.excerpt && String(data.excerpt).trim()),
+      words: content.split(/\s+/).filter(Boolean).length,
       image: data.image || null,
       bodyHtml: marked.parse(content),
       slug,
@@ -309,7 +311,8 @@ function buildHome(posts) {
   const html = template
     .replace("<!--WRITING_CARDS-->", realCards + placeholderCards)
     .replace("<!--HERO_PREVIEW_CARDS-->", () => previewCards)
-    .replace("<!--HERO_FEATURE-->", () => feature);
+    .replace("<!--HERO_FEATURE-->", () => feature)
+    .replace("</head>", () => homeJsonLd() + "</head>");
   fs.mkdirSync(DIST, { recursive: true });
   fs.writeFileSync(path.join(DIST, "index.html"), html);
 }
@@ -321,19 +324,23 @@ function buildPosts(posts) {
     const imageHtml = post.image
       ? `<img class="post-image" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}">`
       : "";
-    const ogImage = post.image ? `https://dailymusicgems.xyz${post.image}` : "https://dailymusicgems.xyz/og-image.png";
+    const ogImage = postOgImage(post);
 
     const html = template
       .replaceAll("{{TITLE}}", escapeHtml(post.title))
       .replaceAll("{{CATEGORY}}", escapeHtml(categoryLabel(post)))
       .replaceAll("{{DATE}}", formatDate(post.date))
-      .replaceAll("{{EXCERPT}}", escapeHtml(post.excerpt))
+      .replaceAll("{{EXCERPT}}", escapeHtml(metaDescription(post.excerpt)))
       .replaceAll("{{URL}}", post.url)
       .replaceAll("{{OG_IMAGE}}", ogImage)
       .replace("{{IMAGE}}", () => imageHtml)
       .replace("{{PLAYER}}", () => playerHtml(post))
       .replace("{{DISCLOSURE}}", () => disclosureHtml(post))
-      .replace("{{BODY}}", post.bodyHtml);
+      .replace("{{BODY}}", post.bodyHtml)
+      // Automatic SEO: keyword-rich <title>, structured data, internal links.
+      .replace(/<title>[^<]*<\/title>/, () => "<title>" + escapeHtml(seoTitle(post)) + "</title>")
+      .replace("</head>", () => postJsonLd(post) + "</head>")
+      .replace('<div class="post-footer">', () => relatedHtml(post, posts) + '    <div class="post-footer">');
 
     const outDir = path.join(DIST, "writing", post.slug);
     fs.mkdirSync(outDir, { recursive: true });
@@ -421,7 +428,10 @@ function buildArtistPages(posts) {
     const artistPosts = entry.posts.slice().sort((a, b) => b.date - a.date);
     const html = renderWritingList(artistPosts, {
       pageTitle: entry.name,
-      metaDescription: `Daily Music Gems write-ups about ${entry.name}.`,
+      metaDescription: metaDescription(
+        `${entry.name} on Daily Music Gems: ${artistPosts.length} piece${artistPosts.length === 1 ? "" : "s"} — ` +
+          artistPosts.map((p) => p.title).join("; ")
+      ),
       canonical: `/writing/artist/${slug}/`,
       backHref: "/writing/artists/",
       backLabel: "Back to all artists",
@@ -502,6 +512,179 @@ function copyStaticAssets() {
   }
 }
 
+// ---------- Automatic SEO helpers ----------
+
+// Trim to the length Google shows (~155 chars) at a word boundary.
+function metaDescription(text, max) {
+  max = max || 155;
+  var t = String(text || "").replace(/\s+/g, " ").trim();
+  if (t.length <= max) return t;
+  var cut = t.slice(0, max - 1);
+  var sp = cut.lastIndexOf(" ");
+  if (sp > 80) cut = cut.slice(0, sp);
+  return cut.replace(/[\s,;:.\-—–]+$/, "") + "…";
+}
+
+// "Title — Artist | Daily Music Gems", kept near Google's ~60-char display limit.
+function seoTitle(post) {
+  var base = post.title;
+  if (post.artist && base.toLowerCase().indexOf(post.artist.toLowerCase()) === -1) {
+    base += " — " + post.artist;
+  }
+  var full = base + " | Daily Music Gems";
+  return full.length <= 62 ? full : base;
+}
+
+function postOgImage(post) {
+  return post.image ? SITE_URL + post.image : SITE_URL + "/og-image.png";
+}
+
+function jsonLdScript(obj) {
+  return '<script type="application/ld+json">' + JSON.stringify(obj).replace(/</g, "\\u003c") + "</script>\n";
+}
+
+function publisherObj() {
+  return {
+    "@type": "Organization",
+    name: "Daily Music Gems",
+    url: SITE_URL + "/",
+    logo: { "@type": "ImageObject", url: SITE_URL + "/og-image.png" },
+  };
+}
+
+function postJsonLd(post) {
+  var article = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title.slice(0, 110),
+    description: metaDescription(post.excerpt),
+    datePublished: isoDate(post.date),
+    dateModified: isoDate(post.date),
+    mainEntityOfPage: { "@type": "WebPage", "@id": SITE_URL + post.url },
+    image: [postOgImage(post)],
+    articleSection: post.category,
+    inLanguage: "en",
+    author: { "@type": "Organization", name: "Daily Music Gems", url: SITE_URL + "/" },
+    publisher: publisherObj(),
+  };
+  if (post.artist) article.about = { "@type": "MusicGroup", name: post.artist };
+  var crumbs = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL + "/" },
+      { "@type": "ListItem", position: 2, name: "Writing", item: SITE_URL + "/writing/" },
+      { "@type": "ListItem", position: 3, name: post.title, item: SITE_URL + post.url },
+    ],
+  };
+  return jsonLdScript(article) + jsonLdScript(crumbs);
+}
+
+function homeJsonLd() {
+  return jsonLdScript({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": SITE_URL + "/#website",
+        name: "Daily Music Gems",
+        alternateName: ["DMG", "Daily Music Gems Blog"],
+        url: SITE_URL + "/",
+        description: "Curated playlists and serious music writing: one song worth your time, every day.",
+        publisher: { "@id": SITE_URL + "/#org" },
+      },
+      Object.assign({ "@id": SITE_URL + "/#org" }, publisherObj(), {
+        sameAs: [
+          "https://www.tiktok.com/@dailymusicgems",
+          "https://open.spotify.com/playlist/3YpuBJqumfFyIr5jLUbjMP",
+        ],
+      }),
+    ],
+  });
+}
+
+// Internal links: other posts on the same artist (or the latest posts) under each article.
+function relatedHtml(post, posts) {
+  var others = posts.filter(function (p) { return p !== post; });
+  var items = post.artist
+    ? others.filter(function (p) { return p.artist && p.artist.toLowerCase() === post.artist.toLowerCase(); })
+    : [];
+  var heading = post.artist ? "More on " + post.artist : "";
+  if (!items.length) {
+    items = others.filter(function (p) { return p.isGem === post.isGem; });
+    heading = post.isGem ? "More gems" : "Keep reading";
+  }
+  items = items.slice(0, 3);
+  var more = post.artist
+    ? '<a class="post-related-all" href="/writing/artist/' + slugify(post.artist) + '/">All writing on ' + escapeHtml(post.artist) + " →</a>"
+    : "";
+  if (!items.length && !more) return "";
+  var lis = items
+    .map(function (p) {
+      return '<li><a href="' + p.url + '">' + escapeHtml(p.title) + '</a><span>' + formatDate(p.date) + "</span></li>";
+    })
+    .join("");
+  return '    <nav class="post-related" aria-label="Related writing"><h2>' + escapeHtml(heading) + "</h2>" +
+    (lis ? "<ul>" + lis + "</ul>" : "") + more + "</nav>\n";
+}
+
+function buildFeed(posts) {
+  var items = posts.slice(0, 30).map(function (p) {
+    return "    <item>\n" +
+      "      <title>" + escapeHtml(p.title) + "</title>\n" +
+      "      <link>" + SITE_URL + p.url + "</link>\n" +
+      '      <guid isPermaLink="true">' + SITE_URL + p.url + "</guid>\n" +
+      "      <pubDate>" + p.date.toUTCString() + "</pubDate>\n" +
+      "      <category>" + escapeHtml(p.category) + "</category>\n" +
+      "      <description>" + escapeHtml(metaDescription(p.excerpt, 300)) + "</description>\n" +
+      "    </item>";
+  }).join("\n");
+  var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0">\n  <channel>\n' +
+    "    <title>Daily Music Gems</title>\n" +
+    "    <link>" + SITE_URL + "/</link>\n" +
+    "    <description>Curated playlists and serious music writing: one song worth your time, every day.</description>\n" +
+    "    <language>en-us</language>\n" + items + "\n  </channel>\n</rss>\n";
+  fs.writeFileSync(path.join(DIST, "feed.xml"), xml);
+}
+
+// Adds the RSS auto-discovery link to every generated page (not the CMS).
+function addFeedLink(dir) {
+  for (var entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    var p = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (dir === DIST && (entry.name === "admin" || entry.name === "assets" || entry.name === "uploads")) continue;
+      addFeedLink(p);
+    } else if (entry.name === "index.html") {
+      var html = fs.readFileSync(p, "utf8");
+      if (html.indexOf("application/rss+xml") === -1) {
+        html = html.replace("</head>", '<link rel="alternate" type="application/rss+xml" title="Daily Music Gems" href="/feed.xml">\n</head>');
+        fs.writeFileSync(p, html);
+      }
+    }
+  }
+}
+
+// Prints plain-English SEO notes into the build log for every post.
+function seoReport(posts) {
+  var notes = [];
+  posts.forEach(function (p) {
+    var n = [];
+    if (p.title.length > 60) n.push("title is " + p.title.length + " chars (aim for 60 or fewer)");
+    if (!p.artist) n.push("no Artist set (needed for the artist page and related links)");
+    if (!p.hasExcerpt) n.push("no Excerpt written (Google will show auto text)");
+    else if (p.excerpt.length < 70 || p.excerpt.length > 160) n.push("excerpt is " + p.excerpt.length + " chars (aim for 70-160)");
+    if (p.isGem) {
+      if (!p.embed) n.push("no playable Spotify/YouTube/SoundCloud link");
+    } else {
+      if (!p.image) n.push("no cover image");
+      if (p.words < 300) n.push("only " + p.words + " words (aim for 600+)");
+    }
+    if (n.length) notes.push("  - " + p.url + ": " + n.join("; "));
+  });
+  if (notes.length) console.log("SEO notes:\n" + notes.join("\n"));
+  else console.log("SEO notes: all posts look good.");
+}
+
 function main() {
   rimraf(DIST);
   fs.mkdirSync(DIST, { recursive: true });
@@ -514,7 +697,10 @@ function main() {
   buildGemsIndex(posts);
   const artists = buildArtistPages(posts);
   buildSitemap(posts, artists);
+  buildFeed(posts);
   copyStaticAssets();
+  addFeedLink(DIST);
+  seoReport(posts);
 
   console.log(`Built ${posts.length} post(s). Output: dist/`);
 }
