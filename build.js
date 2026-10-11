@@ -11,6 +11,7 @@ const { marked } = require("marked");
 const ROOT = __dirname;
 const DIST = path.join(ROOT, "dist");
 const SITE_URL = "https://dailymusicgems.xyz";
+const GEM_CATEGORY = "Gem of the Day";
 
 const PLACEHOLDER_CARDS = [
   {
@@ -86,6 +87,127 @@ function plainTextExcerpt(markdown, max = 160) {
   return text.length > max ? text.slice(0, max).trim() + "…" : text;
 }
 
+function categoryLabel(post) {
+  return post.sponsored ? post.category + " · Sponsored" : post.category;
+}
+
+// Turns a pasted share link into a safe, official embed. Only Spotify, YouTube
+// (privacy-enhanced domain) and SoundCloud links are accepted; anything else
+// returns null, so no arbitrary iframe can ever be injected from a post.
+function parsePlayer(rawUrl) {
+  if (!rawUrl) return null;
+  var u;
+  try { u = new URL(String(rawUrl).trim()); } catch (e) { return null; }
+  if (u.protocol !== "https:") return null;
+  var host = u.hostname.toLowerCase().replace(/^(www|m)\./, "");
+  var parts = u.pathname.split("/").filter(Boolean);
+
+  if (host === "open.spotify.com") {
+    var i = parts[0] && parts[0].indexOf("intl-") === 0 ? 1 : 0;
+    var kind = parts[i];
+    var id = parts[i + 1] || "";
+    var kinds = ["track", "album", "playlist", "episode", "show", "artist"];
+    if (kinds.indexOf(kind) === -1 || !/^[A-Za-z0-9]{10,32}$/.test(id)) return null;
+    return {
+      provider: "Spotify",
+      src: "https://open.spotify.com/embed/" + kind + "/" + id,
+      height: kind === "track" || kind === "episode" ? 152 : 352,
+      allow: "encrypted-media; clipboard-write; fullscreen",
+      link: "https://open.spotify.com/" + kind + "/" + id,
+    };
+  }
+
+  if (host === "youtube.com" || host === "music.youtube.com" || host === "youtu.be") {
+    var vid = null;
+    if (host === "youtu.be") vid = parts[0];
+    else if (parts[0] === "watch") vid = u.searchParams.get("v");
+    else if (parts[0] === "shorts" || parts[0] === "embed") vid = parts[1];
+    var list = u.searchParams.get("list");
+    var base = host === "music.youtube.com" ? "https://music.youtube.com" : "https://www.youtube.com";
+    var ytAllow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+    if (vid && /^[A-Za-z0-9_-]{11}$/.test(vid)) {
+      return {
+        provider: "YouTube",
+        src: "https://www.youtube-nocookie.com/embed/" + vid + "?autoplay=1&rel=0&playsinline=1",
+        height: 220,
+        allow: ytAllow,
+        link: base + "/watch?v=" + vid,
+      };
+    }
+    if (parts[0] === "playlist" && list && /^[A-Za-z0-9_-]{10,64}$/.test(list)) {
+      return {
+        provider: "YouTube",
+        src: "https://www.youtube-nocookie.com/embed/videoseries?list=" + list + "&autoplay=1&rel=0&playsinline=1",
+        height: 220,
+        allow: ytAllow,
+        link: base + "/playlist?list=" + list,
+      };
+    }
+    return null;
+  }
+
+  if (host === "soundcloud.com" && parts.length >= 2 && parts.every(function (p) { return /^[A-Za-z0-9_.%-]+$/.test(p); })) {
+    var clean = "https://soundcloud.com/" + parts.join("/");
+    return {
+      provider: "SoundCloud",
+      src: "https://w.soundcloud.com/player/?url=" + encodeURIComponent(clean) + "&color=%23c98a42&auto_play=true&hide_related=true&show_comments=false&show_teaser=false",
+      height: parts[1] === "sets" ? 300 : 166,
+      allow: "autoplay",
+      link: clean,
+    };
+  }
+
+  return null;
+}
+
+// The player stays a plain button until the visitor presses Play, so no
+// third-party player (or its cookies) loads on page view. assets/gem.js swaps
+// the button for the real iframe on click.
+function playerHtml(post) {
+  var p = post.embed;
+  if (!p) {
+    if (post.playerUrl && /^https:\/\//i.test(post.playerUrl)) {
+      return '<div class="gem-player"><a class="gem-external gem-external-solo" href="' + escapeHtml(post.playerUrl) + '" target="_blank" rel="noopener noreferrer">Listen to this song ↗</a></div>\n';
+    }
+    return "";
+  }
+  return '<div class="gem-player" data-provider="' + p.provider + '">\n' +
+    '  <div class="gem-slot">\n' +
+    '    <button type="button" class="gem-play" data-src="' + escapeHtml(p.src) + '" data-height="' + p.height + '" data-allow="' + escapeHtml(p.allow) + '" aria-label="Play ' + escapeHtml(post.title) + ' on ' + p.provider + '">\n' +
+    '      <svg class="gem-play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>\n' +
+    '      <span class="gem-play-text"><strong>Play</strong><small>Loads the ' + p.provider + ' player</small></span>\n' +
+    '    </button>\n' +
+    '  </div>\n' +
+    '  <div class="gem-player-foot">\n' +
+    '    <a class="gem-external" href="' + escapeHtml(p.link) + '" target="_blank" rel="noopener noreferrer">Open in ' + p.provider + ' ↗</a>\n' +
+    '    <span class="gem-privacy">Playing loads ' + p.provider + '’s player, which may set cookies. We never host the audio.</span>\n' +
+    '  </div>\n' +
+    '</div>\n';
+}
+
+function disclosureHtml(post) {
+  if (post.sponsored) {
+    return '<p class="post-disclosure is-sponsored"><strong>Sponsored.</strong> The artist, label or another party paid for or provided something of value in connection with this post.</p>\n';
+  }
+  if (post.isGem) {
+    return '<p class="post-disclosure">Picked by ear — Daily Music Gems doesn’t sell placement. Players are provided by Spotify, YouTube and SoundCloud, and all music belongs to its respective rights holders.</p>\n';
+  }
+  return "";
+}
+
+function gemHeroHtml(post) {
+  var isToday = isoDate(new Date()) === isoDate(post.date);
+  var blurb = post.excerpt.length > 190 ? post.excerpt.slice(0, 190).trim() + "…" : post.excerpt;
+  var label = (isToday ? "Today’s Gem" : "Latest Gem") + (post.sponsored ? " · Sponsored" : "");
+  return '      <div class="todays-gem">\n' +
+    '        <div class="gem-head"><span class="gem-label">' + label + '</span><span class="gem-date">' + formatDate(post.date) + '</span></div>\n' +
+    '        <h2 class="gem-title">' + escapeHtml(post.title) + '</h2>\n' +
+    (blurb ? '        <p class="gem-blurb">' + escapeHtml(blurb) + '</p>\n' : "") +
+    playerHtml(post) +
+    '        <div class="gem-links"><a href="' + post.url + '">Why it’s a gem →</a><a href="/writing/gems/">All gems →</a></div>\n' +
+    '      </div>\n';
+}
+
 function loadPosts() {
   const postsDir = path.join(ROOT, "content", "posts");
   if (!fs.existsSync(postsDir)) return [];
@@ -104,6 +226,10 @@ function loadPosts() {
       category: data.category || "Writing",
       artist: data.artist && data.artist.trim() ? data.artist.trim() : null,
       featured: !!data.featured,
+      isGem: data.category === GEM_CATEGORY,
+      sponsored: data.sponsored === true || String(data.sponsored).toLowerCase() === "true",
+      playerUrl: data.player_url ? String(data.player_url).trim() : null,
+      embed: parsePlayer(data.player_url),
       date,
       excerpt,
       image: data.image || null,
@@ -125,7 +251,7 @@ function realCardHtml(post) {
           ${imageHtml}
           <div class="card-body">
             <span class="live-flag">Published</span>
-            <span class="category">${escapeHtml(post.category)}</span>
+            <span class="category">${escapeHtml(categoryLabel(post))}</span>
             <h3>${escapeHtml(post.title)}</h3>
             <p class="excerpt">${escapeHtml(post.excerpt)}</p>
             <span class="post-date">${formatDate(post.date)}</span>
@@ -174,9 +300,16 @@ function buildHome(posts) {
 
   const previewCards = pickPreviewPosts(posts).map(heroPreviewCardHtml).join("");
 
+  // Hero feature: today's gem if one exists, otherwise the article previews.
+  const gem = posts.find((p) => p.isGem);
+  const feature = gem
+    ? gemHeroHtml(gem)
+    : '      <div class="hero-preview">\n' + previewCards + '      </div>\n';
+
   const html = template
     .replace("<!--WRITING_CARDS-->", realCards + placeholderCards)
-    .replace("<!--HERO_PREVIEW_CARDS-->", previewCards);
+    .replace("<!--HERO_PREVIEW_CARDS-->", () => previewCards)
+    .replace("<!--HERO_FEATURE-->", () => feature);
   fs.mkdirSync(DIST, { recursive: true });
   fs.writeFileSync(path.join(DIST, "index.html"), html);
 }
@@ -192,12 +325,14 @@ function buildPosts(posts) {
 
     const html = template
       .replaceAll("{{TITLE}}", escapeHtml(post.title))
-      .replaceAll("{{CATEGORY}}", escapeHtml(post.category))
+      .replaceAll("{{CATEGORY}}", escapeHtml(categoryLabel(post)))
       .replaceAll("{{DATE}}", formatDate(post.date))
       .replaceAll("{{EXCERPT}}", escapeHtml(post.excerpt))
       .replaceAll("{{URL}}", post.url)
       .replaceAll("{{OG_IMAGE}}", ogImage)
-      .replace("{{IMAGE}}", imageHtml)
+      .replace("{{IMAGE}}", () => imageHtml)
+      .replace("{{PLAYER}}", () => playerHtml(post))
+      .replace("{{DISCLOSURE}}", () => disclosureHtml(post))
       .replace("{{BODY}}", post.bodyHtml);
 
     const outDir = path.join(DIST, "writing", post.slug);
@@ -236,6 +371,21 @@ function buildWritingIndex(posts) {
     emptyText: "Nothing published yet — check back soon.",
   });
   const outDir = path.join(DIST, "writing");
+  fs.mkdirSync(outDir, { recursive: true });
+  fs.writeFileSync(path.join(outDir, "index.html"), html);
+}
+
+function buildGemsIndex(posts) {
+  const gems = posts.filter((p) => p.isGem);
+  const html = renderWritingList(gems, {
+    pageTitle: "Gem of the Day",
+    metaDescription: "One song worth your time, picked by ear — every Gem of the Day from Daily Music Gems.",
+    canonical: "/writing/gems/",
+    h1: "Gems of the Day",
+    subtitle: "One song worth your time. New picks every day, newest first.",
+    emptyText: "The first gem is coming soon.",
+  });
+  const outDir = path.join(DIST, "writing", "gems");
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, "index.html"), html);
 }
@@ -318,6 +468,7 @@ function buildSitemap(posts, artists) {
     { loc: `${SITE_URL}/`, lastmod: isoDate(new Date()), priority: "1.0" },
     { loc: `${SITE_URL}/writing/`, lastmod: isoDate(new Date()), priority: "0.8" },
     { loc: `${SITE_URL}/writing/featured/`, lastmod: isoDate(new Date()), priority: "0.7" },
+    { loc: `${SITE_URL}/writing/gems/`, lastmod: isoDate(new Date()), priority: "0.7" },
     { loc: `${SITE_URL}/writing/artists/`, lastmod: isoDate(new Date()), priority: "0.6" },
     ...artists.map((a) => ({ loc: `${SITE_URL}/writing/artist/${a.slug}/`, lastmod: isoDate(new Date()), priority: "0.6" })),
     ...posts.map((p) => ({ loc: `${SITE_URL}${p.url}`, lastmod: isoDate(p.date), priority: "0.7" })),
@@ -360,6 +511,7 @@ function main() {
   buildPosts(posts);
   buildWritingIndex(posts);
   buildFeaturedIndex(posts);
+  buildGemsIndex(posts);
   const artists = buildArtistPages(posts);
   buildSitemap(posts, artists);
   copyStaticAssets();
