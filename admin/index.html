@@ -9,7 +9,13 @@
 <body>
   <!-- Content Manager: logs in with your GitHub account (real, GitHub-verified login).
        This page is never linked from the public site or the sitemap, and it's
-       excluded from search engines via robots.txt + the noindex tag above. -->
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+       excluded from search engines via robots.txt + the noindex tag above.
+       The CMS script is pinned to an exact version with an integrity hash, so if
+       the CDN copy is ever tampered with the browser refuses to run it.
+       To upgrade: pick a new decap-cms version and regenerate the sha384 hash. -->
+  <script src="https://unpkg.com/decap-cms@3.16.3/dist/decap-cms.js"
+          integrity="sha384-A/Gdn928CNLufmnGWGs9RM4Q9o8bSNLeJERqBFrBjwzL7FRpoLT3MPF8Tl0+Wd2p"
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
 </body>
 </html>
