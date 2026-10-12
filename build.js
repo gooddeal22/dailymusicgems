@@ -499,11 +499,32 @@ function buildSitemap(posts, artists) {
   fs.writeFileSync(path.join(DIST, "sitemap.xml"), xml);
 }
 
+// A real 404 page: Cloudflare Pages serves dist/404.html (with a 404 status)
+// for any URL that doesn't exist, instead of returning the homepage with a 200.
+function build404(posts) {
+  const latest = posts.slice(0, 3);
+  let html = renderWritingList(latest, {
+    pageTitle: "Page not found",
+    metaDescription: "That page doesn't exist. Here's the latest from Daily Music Gems.",
+    canonical: "/",
+    h1: "Page not found",
+    subtitle: "That link doesn't go anywhere. Here's the latest writing instead.",
+    tag: "404",
+    emptyText: "Head back home to find something to listen to.",
+  });
+  html = html
+    .replace('<meta name="robots" content="index, follow">', '<meta name="robots" content="noindex">')
+    .replace(/<link rel="canonical"[^>]*>\n?/, "");
+  fs.writeFileSync(path.join(DIST, "404.html"), html);
+}
+
 function copyStaticAssets() {
   copyFile(path.join(ROOT, "assets", "favicon.svg"), DIST, "favicon.svg");
   copyFile(path.join(ROOT, "assets", "og-image.png"), DIST, "og-image.png");
   copyDir(path.join(ROOT, "assets"), path.join(DIST, "assets"));
   copyFile(path.join(ROOT, "robots.txt"), DIST, "robots.txt");
+  // Security headers (HSTS, CSP, framing) — read by Cloudflare Pages.
+  copyFile(path.join(ROOT, "_headers"), DIST, "_headers");
   copyDir(path.join(ROOT, "admin"), path.join(DIST, "admin"));
 
   const uploadsDir = path.join(ROOT, "content", "uploads");
@@ -695,6 +716,7 @@ function main() {
   buildWritingIndex(posts);
   buildFeaturedIndex(posts);
   buildGemsIndex(posts);
+  build404(posts);
   const artists = buildArtistPages(posts);
   buildSitemap(posts, artists);
   buildFeed(posts);
