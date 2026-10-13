@@ -484,6 +484,8 @@ function buildSitemap(posts, artists) {
     ...posts.map((p) => ({ loc: `${SITE_URL}${p.url}`, lastmod: isoDate(p.date), priority: "0.7" })),
   ];
 
+  INFO_PAGES.forEach(function (pg) { urls.push({ loc: SITE_URL + pg.url, lastmod: isoDate(new Date()), priority: "0.3" }); });
+
   const body = urls
     .map(
       (u) => `  <url>
@@ -706,6 +708,67 @@ function seoReport(posts) {
   else console.log("SEO notes: all posts look good.");
 }
 
+// Small standalone pages (privacy, contact, how we pick), written in pages/*.md
+// and rendered with the post layout.
+const INFO_PAGES = [
+  { slug: "how-we-pick", url: "/how-we-pick/" },
+  { slug: "privacy", url: "/privacy/" },
+  { slug: "contact", url: "/contact/" },
+];
+
+function buildInfoPages() {
+  const template = fs.readFileSync(path.join(ROOT, "templates", "post.template.html"), "utf8");
+  INFO_PAGES.forEach(function (pg) {
+    const file = path.join(ROOT, "pages", pg.slug + ".md");
+    if (!fs.existsSync(file)) return;
+    const parsed = matter(fs.readFileSync(file, "utf8"));
+    const d = parsed.data || {};
+    const title = String(d.title || pg.slug);
+    const desc = String(d.description || "");
+    const meta = d.updated ? "Last updated " + d.updated : "";
+    const html = template
+      .replaceAll("{{TITLE}}", escapeHtml(title))
+      .replaceAll("{{CATEGORY}}", escapeHtml(String(d.tag || "Info")))
+      .replaceAll("{{EXCERPT}}", escapeHtml(desc))
+      .replaceAll("{{URL}}", pg.url)
+      .replaceAll("{{OG_IMAGE}}", SITE_URL + "/og-image.png")
+      .replace('<p class="post-meta">{{DATE}}</p>', () => (meta ? '<p class="post-meta">' + escapeHtml(meta) + "</p>" : ""))
+      .replace("{{IMAGE}}", () => "")
+      .replace("{{PLAYER}}", () => "")
+      .replace("{{DISCLOSURE}}", () => "")
+      .replace("{{BODY}}", () => marked.parse(parsed.content))
+      .replace('<meta property="og:type" content="article">', '<meta property="og:type" content="website">')
+      .replace('<script src="/assets/gem.js" defer></script>\n', "")
+      .replaceAll("← Back to all writing", "← Back to home")
+      .replaceAll('href="/#writing" class="btn', 'href="/" class="btn')
+      .replace(/<title>[^<]*<\/title>/, () => "<title>" + escapeHtml(title) + " — Daily Music Gems</title>");
+    const outDir = path.join(DIST, pg.slug);
+    fs.mkdirSync(outDir, { recursive: true });
+    fs.writeFileSync(path.join(outDir, "index.html"), html);
+  });
+}
+
+// Adds Privacy / How we pick / Contact links to every page's footer.
+function addFooterLinks(dir) {
+  for (var entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    var p = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (dir === DIST && (entry.name === "admin" || entry.name === "assets" || entry.name === "uploads")) continue;
+      addFooterLinks(p);
+    } else if (entry.name.endsWith(".html")) {
+      var html = fs.readFileSync(p, "utf8");
+      var old = '<a href="mailto:partnerships@dailymusicgems.xyz">Say hello</a>';
+      if (html.indexOf(old) !== -1) {
+        html = html.replace(
+          old,
+          '<a href="/how-we-pick/">How we pick</a>\n      <a href="/privacy/">Privacy</a>\n      <a href="/contact/">Contact</a>'
+        );
+        fs.writeFileSync(p, html);
+      }
+    }
+  }
+}
+
 function main() {
   rimraf(DIST);
   fs.mkdirSync(DIST, { recursive: true });
@@ -717,11 +780,13 @@ function main() {
   buildFeaturedIndex(posts);
   buildGemsIndex(posts);
   build404(posts);
+  buildInfoPages();
   const artists = buildArtistPages(posts);
   buildSitemap(posts, artists);
   buildFeed(posts);
   copyStaticAssets();
   addFeedLink(DIST);
+  addFooterLinks(DIST);
   seoReport(posts);
 
   console.log(`Built ${posts.length} post(s). Output: dist/`);
