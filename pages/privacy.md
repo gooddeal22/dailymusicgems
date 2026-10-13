@@ -15,6 +15,8 @@ Daily Music Gems is a small, independent music site. It has no accounts, no ads,
 
 **Email.** If you write to us, we keep your message and address only to reply and for our records. We do not sell or share them.
 
+**Newsletter.** If you subscribe, the signup form is run by Brevo, which receives your email address. We use it only to send the newsletter, and every email has an unsubscribe link. Signups require a confirmation email before you are added.
+
 ## Third-party services
 
 **Fonts.** Text fonts load from Google Fonts, so Google receives your IP address when a page loads.
