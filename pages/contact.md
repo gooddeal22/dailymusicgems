@@ -11,6 +11,7 @@ That address is for partnerships and sponsorships, press and interview requests,
 ## Elsewhere
 
 - TikTok: [@dailymusicgems](https://www.tiktok.com/@dailymusicgems)
+- YouTube Music: [@dailymusicgems](https://music.youtube.com/@dailymusicgems)
 - YouTube: [@EsauPlays](https://www.youtube.com/@EsauPlays)
 
 ## Corrections
