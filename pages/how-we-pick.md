@@ -16,7 +16,7 @@ The writing covers style analyses, discography deep-dives, artist evolution piec
 
 ## Sponsored content
 
-If an artist, label or brand pays for or provides a placement, it is clearly marked as sponsored on the page, in line with advertising disclosure rules. Sponsorship can buy a spot in the schedule. It cannot buy a better review.
+We never sell music promotion. Picks and reviews cannot be bought. If a post ever involves a paid partnership, free product or any other material connection, it is clearly marked as sponsored on the page, in line with advertising disclosure rules.
 
 ## Get in touch
 
